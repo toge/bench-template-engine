@@ -3,7 +3,12 @@
   "builtin-baseline": "f9ffbaa46ad8e284b2b74919f7e0ba259564d424",
   "dependencies": [
     "benchmark",
-    "frozenchars",
+    {
+      "name": "frozenchars",
+      "features": [
+        "inja"
+      ]
+    },
     "glaze",
     "inja",
     "nlohmann-json"

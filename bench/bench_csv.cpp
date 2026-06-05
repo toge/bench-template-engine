@@ -3,30 +3,7 @@
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include "common.hpp"
-#include "frozenchars.hpp"
-#include "glaze/stencil/stencil.hpp"
-
-// === frozenchars ===
-static auto constexpr kFrozenCsv = R"csv(name,email,age
-Alice Smith,alice@example.com,30
-Bob Johnson,bob@example.com,25
-Carol Williams,carol@example.com,35
-David Brown,david@example.com,28
-Eve Davis,eve@example.com,32
-Frank Miller,frank@example.com,40
-Grace Wilson,grace@example.com,27
-Henry Moore,henry@example.com,45
-Ivy Taylor,ivy@example.com,22
-Jack Anderson,jack@example.com,38
-)csv"_fs;
-
-static void BM_frozenchars_csv(benchmark::State& state) {
-  for (auto _ : state) {
-    auto sv = kFrozenCsv.sv();
-    bench::DoNotOptimize(sv);
-  }
-}
-BENCHMARK(BM_frozenchars_csv);
+#include "frozenchars/inja_engine.hpp"
 
 // === inja ===
 static void BM_inja_csv(benchmark::State& state) {
@@ -69,10 +46,23 @@ struct glz::meta<CsvData> {
   static constexpr auto value = glz::object("users", &CsvData::users);
 };
 
+// === frozenchars: compile-time CSV generation ===
+static auto constexpr kFrozenCsvTmpl = "name,email,age\n{% for user in users %}{{ user.name }},{{ user.email }},{{ user.age }}\n{% endfor %}"_fs;
+
+static void BM_frozenchars_csv(benchmark::State& state) {
+  CsvData data{};
+  for (auto const& u : make_sample_users()) {
+    data.users.push_back(CsvRow{u.name, u.email, u.age});
+  }
+  for (auto _ : state) {
+    auto result = frozenchars::inja::render<kFrozenCsvTmpl>(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_frozenchars_csv);
+
 static void BM_glz_stencil_csv(benchmark::State& state) {
-  static auto constexpr kLayout = std::string_view{R"(name,email,age
-{{#users}}{{name}},{{email}},{{age}}
-{{/users}})"};
+  static auto constexpr kLayout = std::string_view{"name,email,age\n{{#users}}{{name}},{{email}},{{age}}\n{{/users}}"};
 
   CsvData data{};
   for (auto const& u : make_sample_users()) {

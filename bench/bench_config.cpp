@@ -2,29 +2,8 @@
 #include <inja/inja.hpp>
 #include <nlohmann/json.hpp>
 #include "common.hpp"
-#include "frozenchars.hpp"
+#include "frozenchars/inja_engine.hpp"
 #include "glaze/stencil/stencil.hpp"
-
-// === frozenchars ===
-static auto constexpr kFrozenConfig = R"ini(server.host=localhost
-server.port=8080
-database.driver=sqlite3
-database.path=/data/app.db
-cache.enabled=true
-cache.ttl=3600
-log.level=info
-log.file=/var/log/app.log
-auth.secret=changeme
-auth.token_ttl=86400
-)ini"_fs;
-
-static void BM_frozenchars_config(benchmark::State& state) {
-  for (auto _ : state) {
-    auto sv = kFrozenConfig.sv();
-    bench::DoNotOptimize(sv);
-  }
-}
-BENCHMARK(BM_frozenchars_config);
 
 // === inja ===
 static void BM_inja_config(benchmark::State& state) {
@@ -64,6 +43,39 @@ template <>
 struct glz::meta<ConfigStencil> {
   static constexpr auto value = glz::object("entries", &ConfigStencil::entries);
 };
+
+struct ConfigEntryFrozen {
+  std::string key;
+  std::string value;
+};
+
+struct ConfigStencilFrozen {
+  std::vector<ConfigEntryFrozen> entries;
+};
+
+template <>
+struct glz::meta<ConfigEntryFrozen> {
+  static constexpr auto value = glz::object("key", &ConfigEntryFrozen::key, "value", &ConfigEntryFrozen::value);
+};
+
+template <>
+struct glz::meta<ConfigStencilFrozen> {
+  static constexpr auto value = glz::object("entries", &ConfigStencilFrozen::entries);
+};
+
+static auto constexpr kFrozenConfigTmpl = "{% for entry in entries %}{{ entry.key }}={{ entry.value }}\n{% endfor %}"_fs;
+
+static void BM_frozenchars_config(benchmark::State& state) {
+  ConfigStencilFrozen data{};
+  for (auto const& [k, v] : make_sample_config().entries) {
+    data.entries.push_back(ConfigEntryFrozen{k, v});
+  }
+  for (auto _ : state) {
+    auto result = frozenchars::inja::render<kFrozenConfigTmpl>(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_frozenchars_config);
 
 static void BM_glz_stencil_config(benchmark::State& state) {
   static auto constexpr kLayout = std::string_view{R"({{#entries}}{{key}}={{value}}

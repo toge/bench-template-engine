@@ -4,17 +4,16 @@ C++26 のテンプレート/文字列生成手法を比較するベンチマー�
 
 ## 比較対象
 
-| ライブラリ | 性質 | 用途 |
-|------------|------|------|
-| inja | ランタイム | Mustache 風テンプレート |
-| glz::stencil | ランタイム | 構造体フィールドの文字列補間 |
-| frozenchars | コンパイル時 | `_fs` リテラルによる定数文字列 |
+| ライブラリ | テンプレート解析 | レンダリング | 用途 |
+|------------|-----------------|--------------|------|
+| inja | ランタイム | ランタイム | Mustache 風テンプレート |
+| frozenchars::inja | コンパイル時 | ランタイム | Mustache 風テンプレート |
+| glz::stencil | なし（リフレクション） | ランタイム | 構造体フィールドの文字列補間 |
 
 ## ビルド
 
 ```bash
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg-root>/scripts/buildsystems/vcpkg.cmake \
-  -DVCPKG_OVERLAY_PORTS=<custom-ports-dir>/ports
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg-root>/scripts/buildsystems/vcpkg.cmake
 cmake --build build -j
 ```
 
@@ -32,12 +31,12 @@ cd build
 
 ## 結果の見方
 
-- `BM_frozenchars_*`: コンパイル時文字列の `sv()` 呼び出しコスト（ほぼゼロ）
-- `BM_inja_*`: テンプレートパース + レンダリングコスト
-- `BM_glz_stencil_*`: stencil 文字列補間コスト
+- `BM_inja_*`: inja のテンプレートパース + レンダリングコスト
+- `BM_frozenchars_*`: frozenchars::inja のレンダリングコスト（テンプレート解析はコンパイル時）
+- `BM_glz_stencil_*`: glz::stencil のレンダリングコスト（テンプレート解析なし、リフレクション）
 
 ## 注意
 
-- frozenchars はコンパイル時専用のため、ランタイムテンプレートと同じ条件では比較できない
 - inja はパースを `State::SetUp` で1回のみ行い、レンダリングのみ計測
-- glz::stencil は構造体のリフレクションを使用するため、データ構造の定義が必要
+- frozenchars::inja はテンプレートをコンパイル時に解析し、実行時にコンテキストの値を解決
+- glz::stencil は構造体のリフレクションを使用するため、テンプレートパースが不要

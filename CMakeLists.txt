@@ -5,10 +5,17 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# リリースビルドの最適化
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
+
 find_package(benchmark REQUIRED)
 find_package(frozenchars CONFIG REQUIRED)
 find_package(glaze CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(injamm CONFIG REQUIRED)
 
 find_path(INJA_INCLUDE_DIR "inja/inja.hpp")
 if(NOT INJA_INCLUDE_DIR)
@@ -21,6 +28,7 @@ set(COMMON_LIBS
   frozenchars::frozenchars
   glaze::glaze
   nlohmann_json::nlohmann_json
+  injamm::injamm
 )
 
 macro(add_benchmark name)
@@ -36,3 +44,5 @@ add_benchmark(bench_url)
 add_benchmark(bench_json)
 add_benchmark(bench_config)
 add_benchmark(bench_markdown)
+add_benchmark(bench_at_vars)
+add_benchmark(bench_paths)

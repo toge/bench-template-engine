@@ -59,7 +59,7 @@ static void BM_frozenchars_json(benchmark::State& state) {
 BENCHMARK(BM_frozenchars_json);
 
 static void BM_glz_stencil_json(benchmark::State& state) {
-  static auto constexpr kLayout = std::string_view{R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if @last}}{{else}},{{/if}}{{/users}}]})"};
+  static auto constexpr kLayout = std::string_view{R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}},{{/users}}]})"};
 
   JsonData data{};
   for (auto const& u : make_sample_users()) {
@@ -72,3 +72,23 @@ static void BM_glz_stencil_json(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_glz_stencil_json);
+
+// === injamm: bytecode VM rendering ===
+#include <injamm/escape_hatch.hpp>
+
+static void BM_injamm_json_bc(benchmark::State& state) {
+  static auto constexpr kLayout = std::string_view{
+      R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if @last}}{{else}},{{/if}}{{/users}}]})"};
+
+  JsonData data{};
+  for (auto const& u : make_sample_users()) {
+    data.users.push_back(JsonRow{u.name, u.email, u.age});
+  }
+  auto bc = injamm::bc_template<JsonData>(kLayout);
+
+  for (auto _ : state) {
+    auto result = bc.render(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_json_bc);

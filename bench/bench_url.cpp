@@ -104,3 +104,26 @@ static void BM_glz_stencil_url(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_glz_stencil_url);
+
+// === injamm: bytecode VM rendering ===
+#include <injamm/escape_hatch.hpp>
+
+static void BM_injamm_url_bc(benchmark::State& state) {
+  static auto constexpr kLayout = std::string_view{
+      "{{base_url}}?{{p1k}}={{p1v}}&{{p2k}}={{p2v}}&{{p3k}}={{p3v}}&{{p4k}}={{p4v}}&{{p5k}}={{p5v}}"};
+
+  UrlData data{
+      .base_url = "https://example.com/api/search",
+      .p1k = "q", .p1v = "hello world",
+      .p2k = "page", .p2v = "1",
+      .p3k = "limit", .p3v = "10",
+      .p4k = "sort", .p4v = "name",
+      .p5k = "order", .p5v = "asc"};
+  auto bc = injamm::bc_template<UrlData>(kLayout);
+
+  for (auto _ : state) {
+    auto result = bc.render(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_url_bc);

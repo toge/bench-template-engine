@@ -92,3 +92,22 @@ static void BM_glz_stencil_config(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_glz_stencil_config);
+
+// === injamm: bytecode VM rendering ===
+#include <injamm/escape_hatch.hpp>
+
+static void BM_injamm_config_bc(benchmark::State& state) {
+  static auto constexpr kLayout = std::string_view{"{{#entries}}{{key}}={{value}}\n{{/entries}}"};
+
+  ConfigStencil data{};
+  for (auto const& [k, v] : make_sample_config().entries) {
+    data.entries.push_back(ConfigEntry{k, v});
+  }
+  auto bc = injamm::bc_template<ConfigStencil>(kLayout);
+
+  for (auto _ : state) {
+    auto result = bc.render(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_config_bc);

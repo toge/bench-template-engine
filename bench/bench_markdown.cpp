@@ -110,3 +110,28 @@ static void BM_glz_stencil_markdown(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_glz_stencil_markdown);
+
+// === injamm: bytecode VM rendering ===
+#include <injamm/escape_hatch.hpp>
+
+static void BM_injamm_markdown_bc(benchmark::State& state) {
+  static auto constexpr kLayout = std::string_view{
+      "# {{title}}\n\n{{description}}\n\n"
+      "- [{{link1_text}}]({{link1_url}})\n"
+      "- [{{link2_text}}]({{link2_url}})\n"
+      "- [{{link3_text}}]({{link3_url}})"};
+
+  MdData data{
+      .title = "Sample Document",
+      .description = "This is a sample document for benchmarking.",
+      .link1_text = "Home", .link1_url = "https://example.com/",
+      .link2_text = "About", .link2_url = "https://example.com/about",
+      .link3_text = "Contact", .link3_url = "https://example.com/contact"};
+  auto bc = injamm::bc_template<MdData>(kLayout);
+
+  for (auto _ : state) {
+    auto result = bc.render(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_markdown_bc);

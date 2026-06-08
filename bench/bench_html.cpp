@@ -2,6 +2,8 @@
 #include <inja/inja.hpp>
 #include <nlohmann/json.hpp>
 #include "common.hpp"
+#include <injamm/injamm.hpp>
+#include <injamm/escape_hatch.hpp>
 #include "frozenchars/inja_engine.hpp"
 
 // === inja: runtime template rendering ===
@@ -76,3 +78,21 @@ static void BM_glz_stencil_html(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_glz_stencil_html);
+
+// === injamm: bytecode VM rendering ===
+static void BM_injamm_html_bc(benchmark::State& state) {
+  static auto constexpr kLayout = std::string_view{
+      "<table>{{#users}}<tr><td>{{name}}</td><td>{{email}}</td><td>{{age}}</td></tr>{{/users}}</table>"};
+
+  HtmlTable table{};
+  for (auto const& u : make_sample_users()) {
+    table.users.push_back(HtmlRow{u.name, u.email, u.age});
+  }
+  auto bc = injamm::bc_template<HtmlTable>(kLayout);
+
+  for (auto _ : state) {
+    auto result = bc.render(table);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_html_bc);

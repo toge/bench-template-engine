@@ -111,3 +111,16 @@ static void BM_injamm_config_bc(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_injamm_config_bc);
+
+// === injamm: NTTP compile-time rendering ===
+static void BM_injamm_config_nttp(benchmark::State& state) {
+  ConfigStencil data{};
+  for (auto const& [k, v] : make_sample_config().entries) {
+    data.entries.push_back(ConfigEntry{k, v});
+  }
+  for (auto _ : state) {
+    auto result = injamm::render<"{{#entries}}{{key}}={{value}}\n{{/entries}}">(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_config_nttp);

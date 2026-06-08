@@ -95,3 +95,16 @@ static void BM_injamm_csv_bc(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_injamm_csv_bc);
+
+// === injamm: NTTP compile-time rendering ===
+static void BM_injamm_csv_nttp(benchmark::State& state) {
+  CsvData data{};
+  for (auto const& u : make_sample_users()) {
+    data.users.push_back(CsvRow{u.name, u.email, u.age});
+  }
+  for (auto _ : state) {
+    auto result = injamm::render<"name,email,age\n{{#users}}{{name}},{{email}},{{age}}\n{{/users}}">(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_csv_nttp);

@@ -92,3 +92,16 @@ static void BM_injamm_json_bc(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_injamm_json_bc);
+
+// === injamm: NTTP compile-time rendering ===
+static void BM_injamm_json_nttp(benchmark::State& state) {
+  JsonData data{};
+  for (auto const& u : make_sample_users()) {
+    data.users.push_back(JsonRow{u.name, u.email, u.age});
+  }
+  for (auto _ : state) {
+    auto result = injamm::render<R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if @last}}{{else}},{{/if}}{{/users}}]})">(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_json_nttp);

@@ -96,3 +96,16 @@ static void BM_injamm_html_bc(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_injamm_html_bc);
+
+// === injamm: NTTP compile-time rendering ===
+static void BM_injamm_html_nttp(benchmark::State& state) {
+  HtmlTable table{};
+  for (auto const& u : make_sample_users()) {
+    table.users.push_back(HtmlRow{u.name, u.email, u.age});
+  }
+  for (auto _ : state) {
+    auto result = injamm::render<"<table>{{#users}}<tr><td>{{name}}</td><td>{{email}}</td><td>{{age}}</td></tr>{{/users}}</table>">(table);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_html_nttp);

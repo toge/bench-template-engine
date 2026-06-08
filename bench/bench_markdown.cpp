@@ -135,3 +135,18 @@ static void BM_injamm_markdown_bc(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_injamm_markdown_bc);
+
+// === injamm: NTTP compile-time rendering ===
+static void BM_injamm_markdown_nttp(benchmark::State& state) {
+  MdData data{
+      .title = "Sample Document",
+      .description = "This is a sample document for benchmarking.",
+      .link1_text = "Home", .link1_url = "https://example.com/",
+      .link2_text = "About", .link2_url = "https://example.com/about",
+      .link3_text = "Contact", .link3_url = "https://example.com/contact"};
+  for (auto _ : state) {
+    auto result = injamm::render<"# {{title}}\n\n{{description}}\n\n- [{{link1_text}}]({{link1_url}})\n- [{{link2_text}}]({{link2_url}})\n- [{{link3_text}}]({{link3_url}})">(data);
+    bench::DoNotOptimize(result);
+  }
+}
+BENCHMARK(BM_injamm_markdown_nttp);

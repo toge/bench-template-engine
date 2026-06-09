@@ -87,7 +87,7 @@ static void BM_injamm_csv_bc(benchmark::State& state) {
   for (auto const& u : make_sample_users()) {
     data.users.push_back(CsvRow{u.name, u.email, u.age});
   }
-  auto bc = injamm::bc_template<CsvData>(kLayout);
+  auto bc = injamm::engine<CsvData>(kLayout);
 
   for (auto _ : state) {
     auto result = bc.render(data);

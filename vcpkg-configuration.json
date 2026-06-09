@@ -2,7 +2,7 @@
   "registries": [
     {
       "kind": "git",
-      "baseline": "e8a46cb7c5803d87376a4a6d4566a0602356493e",
+      "baseline": "2d414cbe09eecaf7263d40edf09220428e6dff4b",
       "repository": "https://github.com/toge/my-vcpkg-ports",
       "packages": [
         "frozenchars",

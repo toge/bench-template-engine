@@ -119,7 +119,7 @@ static void BM_injamm_url_bc(benchmark::State& state) {
       .p3k = "limit", .p3v = "10",
       .p4k = "sort", .p4v = "name",
       .p5k = "order", .p5v = "asc"};
-  auto bc = injamm::bc_template<UrlData>(kLayout);
+  auto bc = injamm::engine<UrlData>(kLayout);
 
   for (auto _ : state) {
     auto result = bc.render(data);

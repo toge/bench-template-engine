@@ -103,7 +103,7 @@ static void BM_injamm_config_bc(benchmark::State& state) {
   for (auto const& [k, v] : make_sample_config().entries) {
     data.entries.push_back(ConfigEntry{k, v});
   }
-  auto bc = injamm::bc_template<ConfigStencil>(kLayout);
+  auto bc = injamm::engine<ConfigStencil>(kLayout);
 
   for (auto _ : state) {
     auto result = bc.render(data);

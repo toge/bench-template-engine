@@ -127,7 +127,7 @@ static void BM_injamm_markdown_bc(benchmark::State& state) {
       .link1_text = "Home", .link1_url = "https://example.com/",
       .link2_text = "About", .link2_url = "https://example.com/about",
       .link3_text = "Contact", .link3_url = "https://example.com/contact"};
-  auto bc = injamm::bc_template<MdData>(kLayout);
+  auto bc = injamm::engine<MdData>(kLayout);
 
   for (auto _ : state) {
     auto result = bc.render(data);

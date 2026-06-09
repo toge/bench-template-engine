@@ -2,8 +2,7 @@
 #include <inja/inja.hpp>
 #include <nlohmann/json.hpp>
 #include "common.hpp"
-#include <injamm/injamm.hpp>
-#include <injamm/escape_hatch.hpp>
+#include <injamm.hpp>
 #include "frozenchars/inja_engine.hpp"
 
 // === inja: runtime template rendering ===
@@ -88,7 +87,7 @@ static void BM_injamm_html_bc(benchmark::State& state) {
   for (auto const& u : make_sample_users()) {
     table.users.push_back(HtmlRow{u.name, u.email, u.age});
   }
-  auto bc = injamm::bc_template<HtmlTable>(kLayout);
+  auto bc = injamm::engine<HtmlTable>(kLayout);
 
   for (auto _ : state) {
     auto result = bc.render(table);

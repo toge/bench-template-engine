@@ -1,7 +1,6 @@
 #include <benchmark/benchmark.h>
 #include "common.hpp"
-#include <injamm/injamm.hpp>
-#include <injamm/escape_hatch.hpp>
+#include <injamm.hpp>
 #include <glaze/glaze.hpp>
 
 // ---- ベンチマーク用データ型（ネストパス） ----
@@ -46,7 +45,7 @@ static void BM_injamm_path_2level_bc(benchmark::State& state) {
       "Acme",
       BFounder{"Alice", BAddress{"Tokyo", "JP"}}};
   static auto constexpr kTmpl = "{{name}} by {{founder.name}} in {{founder.address.city}}";
-  auto bc = injamm::bc_template<BCompany>(kTmpl);
+  auto bc = injamm::engine<BCompany>(kTmpl);
 
   for (auto _ : state) {
     auto result = bc.render(company);
@@ -61,7 +60,7 @@ static void BM_injamm_path_3level_bc(benchmark::State& state) {
       "Acme",
       BFounder{"Alice", BAddress{"Tokyo", "JP"}}};
   static auto constexpr kTmpl = "{{founder.address.country}}";
-  auto bc = injamm::bc_template<BCompany>(kTmpl);
+  auto bc = injamm::engine<BCompany>(kTmpl);
 
   for (auto _ : state) {
     auto result = bc.render(company);
@@ -77,7 +76,7 @@ static void BM_injamm_path_runtime(benchmark::State& state) {
       BFounder{"Alice", BAddress{"Tokyo", "JP"}}};
 
   for (auto _ : state) {
-    auto bc = injamm::bc_template<BCompany>("{{name}} / {{founder.name}} / {{founder.address.city}}");
+    auto bc = injamm::engine<BCompany>("{{name}} / {{founder.name}} / {{founder.address.city}}");
     auto result = bc.render(company);
     bench::DoNotOptimize(result);
   }

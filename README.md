@@ -57,12 +57,12 @@ cd build
 
 | テンプレート |  inja | frozenchars | glz::stencil | injamm BC | injamm NTTP |
 | ------------ | ----: | ----------: | -----------: | --------: | ----------: |
-| HTML         | 11493 |        8240 |         1972 |       869 |     **845** |
-| CSV          | 10699 |        8125 |         1605 |   **656** |         699 |
-| URL          |  4213 |         926 |          460 |   **178** |         456 |
-| JSON         | 13219 |        9906 |         1770 |   **874** |         977 |
-| Config       |  7626 |        5687 |          987 |       520 |     **461** |
-| Markdown     |  3395 |         641 |          407 |   **243** |         320 |
+| HTML         | 11313 |        7954 |         1950 |   **973** |        1064 |
+| CSV          | 10521 |        7931 |         1454 |   **815** |         833 |
+| URL          |  4198 |         919 |          432 |   **228** |         331 |
+| JSON         | 13504 |        9829 |         1846 |  **1018** |        1101 |
+| Config       |  7531 |        5504 |          987 |       608 |     **638** |
+| Markdown     |  3348 |         677 |          407 |   **284** |         362 |
 
 injamm は全カテゴリで最速。単純なテンプレートでは NTTP(コンパイル時パース)が BC(中間Bytecode) をやや上回り、if/else を含む複雑なテンプレートでは BC が NTTP と同等かやや優れる。
 
@@ -71,23 +71,23 @@ injamm は全カテゴリで最速。単純なテンプレートでは NTTP(コ�
 | パターン                  | 方式 | CPU time (ns) |
 | ------------------------- | ---- | ------------: |
 | 2レベル                   | BC   |            93 |
-| 3レベル                   | BC   |        **47** |
-| 2レベル (runtime compile) | BC   |           292 |
-| 2レベル                   | NTTP |           109 |
-| 3レベル                   | NTTP |        **45** |
+| 3レベル                   | BC   |        **44** |
+| 2レベル (runtime compile) | BC   |           354 |
+| 2レベル                   | NTTP |           126 |
+| 3レベル                   | NTTP |        **57** |
 
 ### @index/@first/@last ループ変数（bench_at_vars）
 
 | パターン                     | 方式    | CPU time (ns) |
 | ---------------------------- | ------- | ------------: |
-| @index                       | BC      |           337 |
-| @index                       | NTTP    |           376 |
-| @index                       | runtime |           526 |
-| @last section                | BC      |           282 |
-| @last section                | NTTP    |           409 |
-| @vars if/else                | BC      |           476 |
-| @vars if/else                | NTTP    |           592 |
-| Large data 1000users         | BC      |         58246 |
-| Large data 1000users         | NTTP    |         51913 |
-| Compile cost 1000x           | BC      |        500596 |
-| Long template 50placeholders | BC      |         10503 |
+| @index                       | BC      |           489 |
+| @index                       | NTTP    |           474 |
+| @index                       | runtime |           717 |
+| @last section                | BC      |           458 |
+| @last section                | NTTP    |           507 |
+| @vars if/else                | BC      |           592 |
+| @vars if/else                | NTTP    |           629 |
+| Large data 1000users         | BC      |         64870 |
+| Large data 1000users         | NTTP    |         63422 |
+| Compile cost 1000x           | BC      |        761471 |
+| Long template 50placeholders | BC      |         13824 |

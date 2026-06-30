@@ -1,7 +1,6 @@
 #include <benchmark/benchmark.h>
 #include "common.hpp"
 #include <injamm.hpp>
-#include "frozenchars/inja_engine.hpp"
 #include <glaze/glaze.hpp>
 #include <glaze/stencil/stencil.hpp>
 #include <inja/inja.hpp>
@@ -39,7 +38,7 @@ static void BM_injamm_at_index_runtime(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    auto bc = injamm::engine<BUsersData>("{{#users}}{{@index}}:{{name}};{{/users}}");
+    auto bc = injamm::engine<BUsersData>("{{#users}}{{loop.index}}:{{name}};{{/users}}");
     auto result = bc.render(data);
     bench::DoNotOptimize(result);
   }
@@ -56,7 +55,7 @@ static void BM_injamm_at_index_nttp(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    auto result = injamm::render<"{{#users}}{{@index}}:{{name}};{{/users}}">(data);
+    auto result = injamm::render<"{{#users}}{{loop.index}}:{{name}};{{/users}}">(data);
     bench::DoNotOptimize(result);
   }
 }
@@ -70,7 +69,7 @@ static void BM_injamm_at_last_section_nttp(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    auto result = injamm::render<"{{#users}}{{name}}{{#@last}}.{{/@last}}{{^@last}},{{/@last}}{{/users}}">(data);
+    auto result = injamm::render<"{{#users}}{{name}}{{#loop.is_last}}.{{/loop.is_last}}{{^loop.is_last}},{{/loop.is_last}}{{/users}}">(data);
     bench::DoNotOptimize(result);
   }
 }
@@ -84,7 +83,7 @@ static void BM_injamm_at_vars_if_else_nttp(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    auto result = injamm::render<"{{#users}}[{{@index}}]{{name}}{{#if @last}}.{{else}},{{/if}}{{/users}}">(data);
+    auto result = injamm::render<"{{#users}}[{{loop.index}}]{{name}}{{#if loop.is_last}}.{{else}},{{/if}}{{/users}}">(data);
     bench::DoNotOptimize(result);
   }
 }
@@ -98,7 +97,7 @@ static void BM_injamm_at_index_bc(benchmark::State& state) {
   for (auto const& u : make_sample_users()) {
     data.users.push_back(BUser{u.name, u.age});
   }
-  auto bc = injamm::engine<BUsersData>("{{#users}}{{@index}}:{{name}};{{/users}}");
+  auto bc = injamm::engine<BUsersData>("{{#users}}{{loop.index}}:{{name}};{{/users}}");
 
   for (auto _ : state) {
     auto result = bc.render(data);
@@ -113,7 +112,7 @@ static void BM_injamm_at_last_section_bc(benchmark::State& state) {
   for (auto const& u : make_sample_users()) {
     data.users.push_back(BUser{u.name, u.age});
   }
-  auto bc = injamm::engine<BUsersData>("{{#users}}{{name}}{{#@last}}.{{/@last}}{{^@last}},{{/@last}}{{/users}}");
+  auto bc = injamm::engine<BUsersData>("{{#users}}{{name}}{{#loop.is_last}}.{{/loop.is_last}}{{^loop.is_last}},{{/loop.is_last}}{{/users}}");
 
   for (auto _ : state) {
     auto result = bc.render(data);
@@ -128,7 +127,7 @@ static void BM_injamm_at_vars_if_else_bc(benchmark::State& state) {
   for (auto const& u : make_sample_users()) {
     data.users.push_back(BUser{u.name, u.age});
   }
-  auto bc = injamm::engine<BUsersData>("{{#users}}[{{@index}}]{{name}}{{#if @last}}.{{else}},{{/if}}{{/users}}");
+  auto bc = injamm::engine<BUsersData>("{{#users}}[{{loop.index}}]{{name}}{{#if loop.is_last}}.{{else}},{{/if}}{{/users}}");
 
   for (auto _ : state) {
     auto result = bc.render(data);
@@ -145,7 +144,7 @@ static void BM_injamm_large_data_bc(benchmark::State& state) {
   for (int i = 0; i < 1000; ++i) {
     data.users.push_back(BUser{"user" + std::to_string(i), 20 + (i % 50)});
   }
-  auto bc = injamm::engine<BUsersData>("{{#users}}{{@index}}:{{name}}({{age}});{{/users}}");
+  auto bc = injamm::engine<BUsersData>("{{#users}}{{loop.index}}:{{name}}({{age}});{{/users}}");
 
   for (auto _ : state) {
     auto result = bc.render(data);
@@ -162,7 +161,7 @@ static void BM_injamm_large_data_nttp(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    auto result = injamm::render<"{{#users}}{{@index}}:{{name}}({{age}});{{/users}}">(data);
+    auto result = injamm::render<"{{#users}}{{loop.index}}:{{name}}({{age}});{{/users}}">(data);
     bench::DoNotOptimize(result);
   }
 }
@@ -178,7 +177,7 @@ static void BM_injamm_compile_cost_bc(benchmark::State& state) {
   for (auto _ : state) {
     // コンパイル + 実行を1000回繰り返す
     for (int i = 0; i < 1000; ++i) {
-      auto bc = injamm::engine<BUsersData>("{{#users}}{{@index}}:{{name}};{{/users}}");
+      auto bc = injamm::engine<BUsersData>("{{#users}}{{loop.index}}:{{name}};{{/users}}");
       auto result = bc.render(data);
       bench::DoNotOptimize(result);
     }
@@ -297,36 +296,4 @@ static void BM_glz_stencil_at_last(benchmark::State& state) {
 }
 BENCHMARK(BM_glz_stencil_at_last);
 
-// === frozenchars benchmarks ===
 
-/// @brief frozenchars: @index 相当
-static auto constexpr kFrozenAtIdx = "{% for user in users %}{{loop.index}}:{{user.name}};{% endfor %}"_fs;
-
-static void BM_frozenchars_at_index(benchmark::State& state) {
-  BUsersData data;
-  for (auto const& u : make_sample_users()) {
-    data.users.push_back(BUser{u.name, u.age});
-  }
-
-  for (auto _ : state) {
-    auto result = frozenchars::inja::render<kFrozenAtIdx>(data);
-    bench::DoNotOptimize(result);
-  }
-}
-BENCHMARK(BM_frozenchars_at_index);
-
-/// @brief frozenchars: @last 相当
-static auto constexpr kFrozenAtLast = "{% for user in users %}{{user.name}}{% if loop.is_last %}.{% else %},{% endif %}{% endfor %}"_fs;
-
-static void BM_frozenchars_at_last(benchmark::State& state) {
-  BUsersData data;
-  for (auto const& u : make_sample_users()) {
-    data.users.push_back(BUser{u.name, u.age});
-  }
-
-  for (auto _ : state) {
-    auto result = frozenchars::inja::render<kFrozenAtLast>(data);
-    bench::DoNotOptimize(result);
-  }
-}
-BENCHMARK(BM_frozenchars_at_last);

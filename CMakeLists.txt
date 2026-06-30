@@ -12,7 +12,6 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
 
 find_package(benchmark REQUIRED)
-find_package(frozenchars CONFIG REQUIRED)
 find_package(glaze CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(injamm CONFIG REQUIRED)
@@ -25,7 +24,6 @@ endif()
 set(COMMON_LIBS
   benchmark::benchmark
   benchmark::benchmark_main
-  frozenchars::frozenchars
   glaze::glaze
   nlohmann_json::nlohmann_json
   injamm::injamm

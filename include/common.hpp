@@ -5,12 +5,8 @@
 #include <string_view>
 #include <vector>
 
-#include "frozenchars.hpp"
 #include "glaze/glaze.hpp"
 #include <nlohmann/json.hpp>
-
-using namespace frozenchars::literals;
-namespace fop = frozenchars::ops;
 
 struct User {
   std::string name;

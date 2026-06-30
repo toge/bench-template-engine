@@ -2,7 +2,6 @@
 #include <inja/inja.hpp>
 #include <nlohmann/json.hpp>
 #include "common.hpp"
-#include "frozenchars/inja_engine.hpp"
 
 // === inja ===
 static void BM_inja_json(benchmark::State& state) {
@@ -43,21 +42,6 @@ struct glz::meta<JsonData> {
   static constexpr auto value = glz::object("users", &JsonData::users);
 };
 
-// === frozenchars: compile-time JSON generation ===
-static auto constexpr kFrozenJsonTmpl = R"({"users":[{% for user in users %}{"name":"{{ user.name }}","email":"{{ user.email }}","age":{{ user.age }}}{% if not loop.is_last %},{% endif %}{% endfor %}]})"_fs;
-
-static void BM_frozenchars_json(benchmark::State& state) {
-  JsonData data{};
-  for (auto const& u : make_sample_users()) {
-    data.users.push_back(JsonRow{u.name, u.email, u.age});
-  }
-  for (auto _ : state) {
-    auto result = frozenchars::inja::render<kFrozenJsonTmpl>(data);
-    bench::DoNotOptimize(result);
-  }
-}
-BENCHMARK(BM_frozenchars_json);
-
 static void BM_glz_stencil_json(benchmark::State& state) {
   static auto constexpr kLayout = std::string_view{R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}},{{/users}}]})"};
 
@@ -78,7 +62,7 @@ BENCHMARK(BM_glz_stencil_json);
 
 static void BM_injamm_json_bc(benchmark::State& state) {
   static auto constexpr kLayout = std::string_view{
-      R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if @last}}{{else}},{{/if}}{{/users}}]})"};
+      R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if loop.is_last}}{{else}},{{/if}}{{/users}}]})"};
 
   JsonData data{};
   for (auto const& u : make_sample_users()) {
@@ -100,7 +84,7 @@ static void BM_injamm_json_nttp(benchmark::State& state) {
     data.users.push_back(JsonRow{u.name, u.email, u.age});
   }
   for (auto _ : state) {
-    auto result = injamm::render<R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if @last}}{{else}},{{/if}}{{/users}}]})">(data);
+    auto result = injamm::render<R"({"users":[{{#users}}{"name":"{{name}}","email":"{{email}}","age":{{age}}}{{#if loop.is_last}}{{else}},{{/if}}{{/users}}]})">(data);
     bench::DoNotOptimize(result);
   }
 }

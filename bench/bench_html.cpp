@@ -3,7 +3,6 @@
 #include <nlohmann/json.hpp>
 #include "common.hpp"
 #include <injamm.hpp>
-#include "frozenchars/inja_engine.hpp"
 
 // === inja: runtime template rendering ===
 static void BM_inja_html(benchmark::State& state) {
@@ -47,21 +46,6 @@ template <>
 struct glz::meta<HtmlRow> {
   static constexpr auto value = glz::object("name", &HtmlRow::name, "email", &HtmlRow::email, "age", &HtmlRow::age);
 };
-
-// === frozenchars: compile-time HTML generation ===
-static auto constexpr kFrozenHtmlTmpl = "<table>{% for user in users %}<tr><td>{{ user.name }}</td><td>{{ user.email }}</td><td>{{ user.age }}</td></tr>{% endfor %}</table>"_fs;
-
-static void BM_frozenchars_html(benchmark::State& state) {
-  HtmlTable table{};
-  for (auto const& u : make_sample_users()) {
-    table.users.push_back(HtmlRow{u.name, u.email, u.age});
-  }
-  for (auto _ : state) {
-    auto result = frozenchars::inja::render<kFrozenHtmlTmpl>(table);
-    bench::DoNotOptimize(result);
-  }
-}
-BENCHMARK(BM_frozenchars_html);
 
 static void BM_glz_stencil_html(benchmark::State& state) {
   static auto constexpr kLayout = std::string_view{"<table>{{#users}}<tr><td>{{name}}</td><td>{{email}}</td><td>{{age}}</td></tr>{{/users}}</table>"};

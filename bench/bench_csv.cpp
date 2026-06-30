@@ -3,7 +3,6 @@
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include "common.hpp"
-#include "frozenchars/inja_engine.hpp"
 
 // === inja ===
 static void BM_inja_csv(benchmark::State& state) {
@@ -45,21 +44,6 @@ template <>
 struct glz::meta<CsvData> {
   static constexpr auto value = glz::object("users", &CsvData::users);
 };
-
-// === frozenchars: compile-time CSV generation ===
-static auto constexpr kFrozenCsvTmpl = "name,email,age\n{% for user in users %}{{ user.name }},{{ user.email }},{{ user.age }}\n{% endfor %}"_fs;
-
-static void BM_frozenchars_csv(benchmark::State& state) {
-  CsvData data{};
-  for (auto const& u : make_sample_users()) {
-    data.users.push_back(CsvRow{u.name, u.email, u.age});
-  }
-  for (auto _ : state) {
-    auto result = frozenchars::inja::render<kFrozenCsvTmpl>(data);
-    bench::DoNotOptimize(result);
-  }
-}
-BENCHMARK(BM_frozenchars_csv);
 
 static void BM_glz_stencil_csv(benchmark::State& state) {
   static auto constexpr kLayout = std::string_view{"name,email,age\n{{#users}}{{name}},{{email}},{{age}}\n{{/users}}"};

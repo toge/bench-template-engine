@@ -1,14 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "builtin-baseline": "eb775ea8f0d4c0d3c5d3c4b10d17837ca9f9ca57",
+  "builtin-baseline": "6da16a9600492fbcb7713560d993ac76823290de",
   "dependencies": [
     "benchmark",
-    {
-      "name": "frozenchars",
-      "features": [
-        "inja"
-      ]
-    },
     "glaze",
     "inja",
     "injamm",

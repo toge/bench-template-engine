@@ -2,7 +2,7 @@
   "registries": [
     {
       "kind": "git",
-      "baseline": "152ad761866e677278ddef51fa16b32985e2665b",
+      "baseline": "dc7366c2f361fe5a2238b7f081b28e663ada6099",
       "repository": "https://github.com/toge/my-vcpkg-ports",
       "packages": [
         "injamm"

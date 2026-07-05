@@ -48,43 +48,43 @@ cd build
 
 ## ベンチマーク結果
 
-以下は 2026-06-29 時点の計測値。単位は ns/op（実測 CPU time）、値が小さいほど高速。
+以下は 2026-07-05 時点の計測値。単位は ns/op（実測 CPU time）、値が小さいほど高速。
 
 ### テンプレートレンダリング（6種）
 
 | テンプレート |  inja | glz::stencil | injamm BC | injamm NTTP |
 | ------------ | ----: | -----------: | --------: | ----------: |
-| HTML         | 15497 |         2976 |  **1365** |        1477 |
-| CSV          | 15205 |         2388 |  **1215** |        1408 |
-| URL          |  5496 |          665 |   **298** |         459 |
-| JSON         | 19486 |         2746 |  **1683** |        1793 |
-| Config       | 10733 |         1439 |   **669** |         862 |
-| Markdown     |  4747 |          617 |   **472** |         557 |
+| HTML         | 11458 |         2128 |  **1153** |        1196 |
+| CSV          | 10422 |         1658 |   **996** |        1038 |
+| URL          |  4335 |          477 |        256 |     **246** |
+| JSON         | 14367 |         1857 |       1421 |    **1333** |
+| Config       |  7923 |         1052 |        526 |     **515** |
+| Markdown     |  3626 |          446 |   **298** |         310 |
 
-injamm は全カテゴリで最速。単純なテンプレートでは NTTP(コンパイル時パース)が BC(中間Bytecode) をやや上回り、if/else を含む複雑なテンプレートでは BC が NTTP と同等かやや優れる。
+injamm は全カテゴリで最速。NTTP（コンパイル時パース）が URL/JSON/Config で BC を上回り、BC は HTML/CSV/Markdown でリードする。テンプレートの特性に応じた使い分けでより高い性能を引き出せる。
 
 ### ネストパス解決（bench_paths）
 
 | パターン                  | 方式 | CPU time (ns) |
 | ------------------------- | ---- | ------------: |
-| 2レベル                   | BC   |           148 |
-| 3レベル                   | BC   |        **70** |
-| 2レベル (runtime compile) | BC   |          1006 |
-| 2レベル                   | NTTP |           225 |
-| 3レベル                   | NTTP |         **87** |
+| 2レベル                   | BC   |           116 |
+| 3レベル                   | BC   |       **57** |
+| 2レベル (runtime compile) | BC   |           705 |
+| 2レベル                   | NTTP |           110 |
+| 3レベル                   | NTTP |      **54** |
 
 ### @index/@first/@last ループ変数（bench_at_vars）
 
 | パターン                     | 方式    | CPU time (ns) |
 | ---------------------------- | ------- | ------------: |
-| @index                       | BC      |       **539** |
-| @index                       | NTTP    |           587 |
-| @index                       | runtime |          1433 |
-| @last section                | BC      |       **499** |
-| @last section                | NTTP    |           749 |
-| @vars if/else                | BC      |       **742** |
-| @vars if/else                | NTTP    |           975 |
-| Large data 1000users         | BC      |      **63003** |
-| Large data 1000users         | NTTP    |         67902 |
-| Compile cost 1000x           | BC      |        992910 |
-| Long template 50placeholders | BC      |         12281 |
+| @index                       | BC       |       **356** |
+| @index                       | NTTP    |           420 |
+| @index                       | runtime |          1087 |
+| @last section                | BC       |       **376** |
+| @last section                | NTTP    |           376 |
+| @vars if/else                | BC       |       **607** |
+| @vars if/else                | NTTP    |           626 |
+| Large data 1000users         | BC       |      **53734** |
+| Large data 1000users         | NTTP    |         54704 |
+| Compile cost 1000x           | BC       |       1018790 |
+| Long template 50placeholders | BC       |         10617 |

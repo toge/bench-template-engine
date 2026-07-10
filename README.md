@@ -43,49 +43,49 @@ cd build
 
 - inja はパースを `State::SetUp` で1回のみ行い、レンダリングのみ計測
 - glz::stencil は構造体のリフレクションを使用するため、テンプレートパースが不要
-- インストールバージョン: glaze 7.8.4, injamm 2026-07-07
+- インストールバージョン: glaze 7.8.4, injamm 2026-07-10
 - injamm BC はランタイムでパース→バイトコードコンパイルを行い、その後のレンダリングのみ計測
 - injamm NTTP はテンプレートをコンパイル時にパースするため、実行時のパースオーバーヘッドがゼロ
 
 ## ベンチマーク結果
 
-以下は 2026-07-08 時点の計測値。単位は ns/op（実測 CPU time）、値が小さいほど高速。
+以下は 2026-07-10 時点の計測値。単位は ns/op（実測 CPU time）、値が小さいほど高速。
 
 ### テンプレートレンダリング（6種）
 
 | テンプレート |  inja | glz::stencil | injamm BC | injamm NTTP |
 | ------------ | ----: | -----------: | --------: | ----------: |
-| HTML         | 11131 |         1960 |  **1005** |        1056 |
-| CSV          | 10973 |         1410 |        857 |     **804** |
-| URL          |  3997 |          461 |     **231** |         232 |
-| JSON         | 13734 |         2710 |       1257 |    **1214** |
-| Config       |  7625 |         1015 |    **485** |         490 |
-| Markdown     |  3325 |          441 |        263 |     **261** |
+| HTML         | 10659 |         1971 |  **1060** |        1071 |
+| CSV          | 10218 |         1449 |     **858** |         871 |
+| URL          |  3876 |          458 |     **215** |         217 |
+| JSON         | 12926 |         1811 |       1313 |    **1283** |
+| Config       |  7194 |          997 |        477 |     **460** |
+| Markdown     |  3188 |          400 |     **233** |         236 |
 
-injamm は全カテゴリで最速。NTTP（コンパイル時パース）が CSV/JSON/Markdown で BC を上回り、BC は HTML/URL/Config でリードする。テンプレートの特性に応じた使い分けでより高い性能を引き出せる。
+injamm は全カテゴリで最速。BC（バイトコードVM）が HTML/CSV/URL/Markdown でリードし、NTTP（コンパイル時パース）が JSON/Config で BC を上回る。テンプレートの特性に応じた使い分けでより高い性能を引き出せる。
 
 ### ネストパス解決（bench_paths）
 
 | パターン                  | 方式 | CPU time (ns) |
 | ------------------------- | ---- | ------------: |
 | 2レベル                   | BC   |           108 |
-| 3レベル                   | BC   |          51.9 |
-| 2レベル (runtime compile) | BC   |           675 |
-| 2レベル                   | NTTP |       **106** |
-| 3レベル                   | NTTP |      **51.5** |
+| 3レベル                   | BC   |          50.7 |
+| 2レベル (runtime compile) | BC   |           724 |
+| 2レベル                   | NTTP |       **96.3** |
+| 3レベル                   | NTTP |      **48.6** |
 
 ### @index/@first/@last ループ変数（bench_at_vars）
 
 | パターン                     | 方式    | CPU time (ns) |
 | ---------------------------- | ------- | ------------: |
-| @index                       | BC       |           398 |
-| @index                       | NTTP    |       **389** |
-| @index                       | runtime |          1020 |
-| @last section                | BC       |       **370** |
-| @last section                | NTTP    |           388 |
-| @vars if/else                | BC       |           641 |
-| @vars if/else                | NTTP    |       **639** |
-| Large data 1000users         | BC       |      **55660** |
-| Large data 1000users         | NTTP    |         56156 |
-| Compile cost 1000x           | BC       |        953568 |
-| Long template 50placeholders | BC       |         10280 |
+| @index                       | BC       |       **367** |
+| @index                       | NTTP    |           375 |
+| @index                       | runtime |           975 |
+| @last section                | BC       |           404 |
+| @last section                | NTTP    |       **389** |
+| @vars if/else                | BC       |       **663** |
+| @vars if/else                | NTTP    |           685 |
+| Large data 1000users         | BC       |      **58271** |
+| Large data 1000users         | NTTP    |         57536 |
+| Compile cost 1000x           | BC       |        980046 |
+| Long template 50placeholders | BC       |         9788 |

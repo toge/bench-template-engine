@@ -45,3 +45,8 @@ add_benchmark(bench_markdown)
 add_benchmark(bench_at_vars)
 add_benchmark(bench_paths)
 add_benchmark(bench_oneshot)
+
+add_executable(bench_codegen bench/bench_codegen.cpp)
+target_include_directories(bench_codegen PRIVATE include ${INJA_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(bench_codegen PRIVATE ${COMMON_LIBS})
+target_compile_features(bench_codegen PRIVATE cxx_std_26)

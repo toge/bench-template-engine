@@ -42,7 +42,7 @@ render_at_if_else(const T& data, std::string& out) {
     append_number(out, _i1);
     out += "]";
     html_escape_append_value(out, _item1.name);
-    if (_i1 + 1 == _size1) {
+    if (static_cast<bool>(_i1 + 1 == _size1)) {
       out += ".";
     } else {
       out += ",";

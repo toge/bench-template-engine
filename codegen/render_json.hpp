@@ -46,7 +46,8 @@ render_json(const T& data, std::string& out) {
     out += "\",\"age\":";
     html_escape_append_value(out, _item1.age);
     out += "}";
-    if (!(_i1 + 1 == _size1)) {
+    if (static_cast<bool>(_i1 + 1 == _size1)) {
+    } else {
       out += ",";
     }
   }

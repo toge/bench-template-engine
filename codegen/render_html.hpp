@@ -36,9 +36,7 @@ render_html(const T& data, std::string& out) {
   out.reserve(51);
   
   out += "<table>";
-  auto _size1 = data.users.size();
-  for (std::size_t _i1 = 0; _i1 < _size1; ++_i1) {
-    const auto& _item1 = data.users[_i1];
+  for (const auto& _item1 : data.users) {
     out += "<tr><td>";
     html_escape_append_value(out, _item1.name);
     out += "</td><td>";

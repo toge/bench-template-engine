@@ -36,9 +36,7 @@ render_csv(const T& data, std::string& out) {
   out.reserve(18);
   
   out += "name,email,age\n";
-  auto _size1 = data.users.size();
-  for (std::size_t _i1 = 0; _i1 < _size1; ++_i1) {
-    const auto& _item1 = data.users[_i1];
+  for (const auto& _item1 : data.users) {
     html_escape_append_value(out, _item1.name);
     out += ",";
     html_escape_append_value(out, _item1.email);

@@ -21,37 +21,42 @@ namespace generated {
  * @brief テンプレート文字列から生成されたレンダリング関数（バッファ再利用版）
  *
  * @details injamm_codegen によって自動生成された関数。
- *          出力先バッファを引数で受け取り、内部バッファを再利用することで
- *          アロケーションを削減する。
+ *          出力先を引数で受け取る。std::string ならバッファを再利用し、
+ *          injamm::detail::output_sink を満たす型（callback_sink 等）なら
+ *          ストリーミング出力する。
  *
- * @tparam T データ型（フィールドへのアクセスが必要）
+ * @tparam T    データ型（フィールドへのアクセスが必要）
+ * @tparam Sink 出力先型（std::string または output_sink を満たす型）
  * @param data レンダリング対象のデータ
- * @param out  出力先バッファ（内容はクリアされる）
+ * @param out  出力先（std::string なら内容はクリアされる）
  * @return 正常時: void。エラー時: error_ctx
  */
-template <typename T>
+template <typename T, typename Sink = std::string>
+  requires injamm::detail::output_sink<Sink>
 [[nodiscard]] std::expected<void, injamm::error_ctx>
-render_markdown(const T& data, std::string& out) {
-  out.clear();
-  out.reserve(26);
+render_markdown(const T& data, Sink& out) {
+  if constexpr (std::is_same_v<Sink, std::string>) {
+    out.clear();
+    out.reserve(282);
+  }
   
-  out += "# ";
+  out.append("# ");
   html_escape_append_value(out, data.title);
-  out += "\n\n";
+  out.append("\n\n");
   html_escape_append_value(out, data.description);
-  out += "\n\n- [";
+  out.append("\n\n- [");
   html_escape_append_value(out, data.link1_text);
-  out += "](";
+  out.append("](");
   html_escape_append_value(out, data.link1_url);
-  out += ")\n- [";
+  out.append(")\n- [");
   html_escape_append_value(out, data.link2_text);
-  out += "](";
+  out.append("](");
   html_escape_append_value(out, data.link2_url);
-  out += ")\n- [";
+  out.append(")\n- [");
   html_escape_append_value(out, data.link3_text);
-  out += "](";
+  out.append("](");
   html_escape_append_value(out, data.link3_url);
-  out += ")";
+  out.append(")");
   
   return {};
 }

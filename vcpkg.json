@@ -1,10 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "builtin-baseline": "d92484ed3c5020c6679d095ad3e5add907887b62",
+  "builtin-baseline": "04a9d8e5212d01ee1dd9478eadd9caade4f8b0d4",
   "dependencies": [
     "benchmark",
     "glaze",
     "inja",
+    "fmt",
     {
       "name": "injamm",
       "features": [
@@ -12,6 +13,9 @@
         "util"
       ]
     },
+    "mstch",
+    "kainjow-mustache",
+    "jinja2cpp",
     "nlohmann-json"
   ]
 }

@@ -2,10 +2,12 @@
   "registries": [
     {
       "kind": "git",
-      "baseline": "2037cedfae515c5be40d7ac4afde641b016c441c",
+      "baseline": "e4273ed640e312fc61cc6923013bd0249d3e6b49",
       "repository": "https://github.com/toge/my-vcpkg-ports",
       "packages": [
-        "injamm"
+        "injamm",
+        "jinja2cpp",
+        "kainjow-mustache"
       ]
     }
   ]
